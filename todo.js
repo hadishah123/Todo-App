@@ -1,14 +1,18 @@
-let todoList = [
-  {
-    item: 'Buy Milk',
-    dueDate: '4/10/2023'
-  },
-  {
-    item: 'Go to College',
-    dueDate: '4/10/2023'
+let todoList = [];
+
+// Load todos from localStorage when page loads
+window.addEventListener('load', () => {
+  try {
+    const savedTodos = localStorage.getItem('todoList');
+    if (savedTodos) {
+      todoList = JSON.parse(savedTodos);
+      displayItems();
+    }
+  } catch (error) {
+    console.error('Error loading todos:', error);
+    todoList = [];
   }
-];
-displayItems();
+});
 
 function displayItems() {
   let containerElement = document.querySelector('.todo-container');
@@ -18,11 +22,16 @@ function displayItems() {
     newHtml += `
       <span>${item}</span>
       <span>${dueDate}</span>
-      <button class='btn-delete' onclick="todoList.splice(${i}, 1);
-      displayItems();">Delete</button>
+      <button class='btn-delete' onclick="deleteTodo(${i})">Delete</button>
     `;
   }
   containerElement.innerHTML = newHtml;
+}
+
+function deleteTodo(index) {
+  todoList.splice(index, 1);
+  saveTodos();
+  displayItems();
 }
 
 function addTodo() {
@@ -30,8 +39,23 @@ function addTodo() {
   let dateElement = document.querySelector('#todo-date');
   let todoItem = inputElement.value;
   let todoDate = dateElement.value;
-  todoList.push({item: todoItem, dueDate: todoDate});
-  inputElement.value = '';
-  dateElement.value = '';
-  displayItems();
+  
+  if (todoItem && todoDate) {
+    todoList.push({item: todoItem, dueDate: todoDate});
+    saveTodos();
+    
+    // Clear inputs
+    inputElement.value = '';
+    dateElement.value = '';
+    
+    displayItems();
+  }
+}
+
+function saveTodos() {
+  try {
+    localStorage.setItem('todoList', JSON.stringify(todoList));
+  } catch (error) {
+    console.error('Error saving todos:', error);
+  }
 }
